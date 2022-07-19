@@ -1,0 +1,3 @@
+#define VERSION_MAJOR @RoadToVulkan_VERSION_MAJOR@
+#define VERSION_MINOR @RoadToVulkan_VERSION_MINOR@
+#define VERSION_PATCH @RoadToVulkan_VERSION_PATCH@

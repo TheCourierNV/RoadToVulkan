@@ -10,3 +10,6 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
 include(CPack)
+
+configure_file(include/Version.h Version.h)
+target_include_directories(RoadToVulkan PUBLIC "${PROJECT_BINARY_DIR}")
