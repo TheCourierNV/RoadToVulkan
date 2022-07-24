@@ -7,11 +7,9 @@
 #include <glm/mat4x4.hpp>
 
 #include <iostream>
-#include "Version.h"
 
 int main(int, char**) {
     std::cout << "Hello, world!" << std::endl;
-    std::cout << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_PATCH << std::endl;
 
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
