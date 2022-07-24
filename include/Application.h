@@ -3,6 +3,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <vector>
+
 class Application {
     public:
         void run();
@@ -10,6 +12,8 @@ class Application {
     private:
         void windowInit();
         void vulkanInit();
+        void createVulkanInstance();
+        bool checkVulkanExtensions(const char** requiredExtensions, uint32_t requiredExtensionsAmount, std::vector<VkExtensionProperties>& availableExtensions);
         void mainLoop();
         void cleanUp();
 
@@ -17,4 +21,5 @@ class Application {
 
     private:
         GLFWwindow* window;
+        VkInstance instance;
 };
