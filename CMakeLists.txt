@@ -16,3 +16,5 @@ include(CPack)
 
 configure_file(include/Version.h Version.h)
 target_include_directories(RoadToVulkan PUBLIC "${PROJECT_BINARY_DIR}")
+
+target_link_libraries(RoadToVulkan -lglfw -lvulkan)
