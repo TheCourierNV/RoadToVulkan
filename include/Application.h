@@ -12,6 +12,8 @@ class Application {
     private:
         void windowInit();
         void vulkanInit();
+        void pickPhysicalDevice();
+        bool isDeviceSuitable(VkPhysicalDevice toCheck);
         bool checkValidationLayerSupport();
         void createVulkanInstance();
         bool checkVulkanExtensions(const char** requiredExtensions, uint32_t requiredExtensionsAmount, std::vector<VkExtensionProperties>& availableExtensions);
@@ -33,4 +35,5 @@ class Application {
         
         GLFWwindow* window;
         VkInstance instance;
+        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 };

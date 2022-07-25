@@ -29,6 +29,49 @@ void Application::vulkanInit() {
     pickPhysicalDevice();
 }
 
+void Application::pickPhysicalDevice(){
+    std::cout << "Selecting a physical device" << std::endl;
+
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    if(deviceCount == 0){
+        // TODO: logging system & ask the user to not run this on a toaster
+        std::cout << "[ERROR]: No Vulkan physical devices (A.K.A. GPUs) detected!" << std::endl;
+    }
+
+    std::vector<VkPhysicalDevice> allPhysicalDevices(deviceCount);
+
+    vkEnumeratePhysicalDevices(instance, &deviceCount, allPhysicalDevices.data());
+
+    // TODO: Let the user decide on which GPU we should select out of the compatible ones
+    for(const auto& device : allPhysicalDevices){
+        if(isDeviceSuitable(device)){
+            physicalDevice = device;
+            std::cout << "Found compatible device!" << std::endl;
+            break;
+        }
+    }
+
+    if(physicalDevice == VK_NULL_HANDLE){
+        // TODO: logging system & tell the user that none of his gpus actually support the required extensions
+        std::cout << "[ERROR]: None of the available GPUs are compatible!" << std::endl;
+    }
+}
+
+bool Application::isDeviceSuitable(VkPhysicalDevice toCheck){
+    std::cout << "\tChecking a physical device" << std::endl;
+
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(toCheck, &deviceProperties);
+
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceFeatures(toCheck, &deviceFeatures);
+
+    // TODO: implement actual checks
+    return true;
+}
+
 bool Application::checkValidationLayerSupport(){
 
     std::cout << "Checking validation layers status" << std::endl;
