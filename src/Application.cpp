@@ -26,10 +26,54 @@ void Application::windowInit() {
 void Application::vulkanInit() {
     std::cout << "Initializing Vulkan" << std::endl;
     createVulkanInstance();
+    pickPhysicalDevice();
+}
+
+bool Application::checkValidationLayerSupport(){
+
+    std::cout << "Checking validation layers status" << std::endl;
+
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    std::cout << "\tSupported layers: " << layerCount << std::endl;
+
+    for(const auto& layerProperties : availableLayers){
+        std::cout << "\t\t" << layerProperties.layerName << std::endl;
+    }
+
+    std::cout << "\tRequested layers: " << validationLayers.size() << std::endl;
+    for(const char* requestedLayerName : validationLayers){
+        std::cout << "\t\t" << requestedLayerName << std::endl;
+    }
+
+    for(const char* layerName : validationLayers){
+        bool found = false;
+
+        for(const auto& layerProperties : availableLayers){
+            if(std::string(layerName) == std::string(layerProperties.layerName)){
+                found = true;
+                break;
+            }
+        }
+
+        if(!found)
+            return false;
+    }
+
+    std::cout << "\tValidation layers OK!" << std::endl;
+    return true;
 }
 
 void Application::createVulkanInstance() {
     std::cout << "Creating Vulkan instance" << std::endl;
+
+    if(enableValidationLayers && !checkValidationLayerSupport()){
+        std::cout << "[ERROR]: Validation layers were requested but are not available!" << std::endl;
+    }
 
     // Non mandatory application info struct
     VkApplicationInfo appInfo{};
@@ -63,18 +107,23 @@ void Application::createVulkanInstance() {
 
     glfwExtensionsRaw = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-    // Ask Vulkan to enable the required extensions
-    createInfo.enabledExtensionCount = glfwExtensionCount;
-    createInfo.ppEnabledExtensionNames = glfwExtensionsRaw;
-
-
-
     if(!checkVulkanExtensions(glfwExtensionsRaw, glfwExtensionCount, allSupportedExtensions)){
         // TODO: create logging and report which extensions are missing
         std::cout << "[ERROR]: Missing required extensions!" << std::endl;
     }
 
-    createInfo.enabledLayerCount = 0;
+    // Ask Vulkan to enable the required extensions
+    createInfo.enabledExtensionCount = glfwExtensionCount;
+    createInfo.ppEnabledExtensionNames = glfwExtensionsRaw;
+
+
+    // Enable the validation layer only if it was requested
+    if(enableValidationLayers){
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    }else{
+        createInfo.enabledLayerCount = 0;
+    }
 
     VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
 
@@ -107,7 +156,7 @@ bool Application::checkVulkanExtensions(const char** requiredExtensions, uint32_
         for(auto extension : availableExtensions){
             if(std::string(extension.extensionName) == std::string(requiredExtensions[i])){
                 found = true;
-                continue;
+                break;
             }
         }
         if(!found)
