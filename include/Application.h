@@ -10,13 +10,27 @@ class Application {
         void run();
 
     private:
+        // Init functions
+
         void windowInit();
         void vulkanInit();
+        
+        // Vulkan device validation (AKA: is there a compatible GPU in the system?)
+
         void pickPhysicalDevice();
         bool isDeviceSuitable(VkPhysicalDevice toCheck);
-        bool checkValidationLayerSupport();
-        void createVulkanInstance();
         bool checkVulkanExtensions(const char** requiredExtensions, uint32_t requiredExtensionsAmount, std::vector<VkExtensionProperties>& availableExtensions);
+        
+        // Vulkan layers
+
+        bool checkValidationLayerSupport();
+        
+        // Vulkan management
+        
+        void createVulkanInstance();
+
+       // Actual application code 
+
         void mainLoop();
         void cleanUp();
 
