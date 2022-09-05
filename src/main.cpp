@@ -3,9 +3,9 @@
 #include "Application.h"
 
 int main(int, char **) {
-    std::cout << "RoadToVulkan" << std::endl;
+	std::cout << "RoadToVulkan" << std::endl;
 
-    Application app;
+	Application app;
 
-    app.run();
+	app.run();
 }

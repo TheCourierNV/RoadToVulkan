@@ -74,6 +74,7 @@
 		"strstream": "cpp",
 		"bitset": "cpp",
 		"charconv": "cpp",
-		"complex": "cpp"
+		"complex": "cpp",
+		"hash_map": "cpp"
 	}
 }
