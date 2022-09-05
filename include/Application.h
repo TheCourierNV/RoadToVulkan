@@ -27,6 +27,8 @@ class Application {
 	GLFWwindow *window;
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	VkDevice logicalDevice;
+	VkQueue graphicsQueue;
 
   public:
 	void run();
@@ -40,10 +42,9 @@ class Application {
 	// Vulkan device validation (AKA: is there a compatible GPU in the system?)
 
 	void pickPhysicalDevice();
+	void createLogicalDevice();
 	bool isDeviceSuitable(VkPhysicalDevice toCheck);
-	bool checkVulkanExtensions(
-		const char **requiredExtensions, uint32_t requiredExtensionsAmount,
-		std::vector<VkExtensionProperties> &availableExtensions);
+	bool checkVulkanExtensions(const char **requiredExtensions, uint32_t requiredExtensionsAmount, std::vector<VkExtensionProperties> &availableExtensions);
 
 	// Vulkan layers
 
