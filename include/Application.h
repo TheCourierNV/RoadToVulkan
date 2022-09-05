@@ -11,8 +11,9 @@ class Application {
   private:
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
+		std::optional<uint32_t> presentFamily;
 
-		bool isComplete() { return graphicsFamily.has_value(); }
+		bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
 	};
 
 	const std::vector<const char *> validationLayers = {
@@ -29,6 +30,8 @@ class Application {
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	VkDevice logicalDevice;
 	VkQueue graphicsQueue;
+	VkQueue presentQueue;
+	VkSurfaceKHR surface;
 
   public:
 	void run();
@@ -38,6 +41,7 @@ class Application {
 
 	void windowInit();
 	void vulkanInit();
+	void createSurface();
 
 	// Vulkan device validation (AKA: is there a compatible GPU in the system?)
 

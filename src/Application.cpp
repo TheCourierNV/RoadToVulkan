@@ -1,4 +1,5 @@
 #include <iostream>
+#include <set>
 
 #include "Application.h"
 
@@ -40,8 +41,18 @@ void Application::windowInit() {
 void Application::vulkanInit() {
 	std::cout << "Initializing Vulkan" << std::endl;
 	createVulkanInstance();
+	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
+}
+
+void Application::createSurface() {
+	std::cout << "Creating a surface" << std::endl;
+	if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+		std::cout << "Surface creation FAILED!" << std::endl;
+	} else {
+		std::cout << "Surface creation SUCCEEDED!" << std::endl;
+	}
 }
 
 void Application::createLogicalDevice() {
@@ -49,22 +60,28 @@ void Application::createLogicalDevice() {
 
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-	std::cout << "\tSetting up the queueCreateInfo struct" << std::endl;
-	VkDeviceQueueCreateInfo queueCreateInfo{};
-	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	queueCreateInfo.queueCount = 1;
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
+	std::cout << "\tSetting up the queueCreateInfo struct" << std::endl;
 	float queuePriority = 1.0f;
-	queueCreateInfo.pQueuePriorities = &queuePriority;
+	for (uint32_t queueFamily : uniqueQueueFamilies) {
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 
 	VkDeviceCreateInfo createInfo{};
 
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	createInfo.pQueueCreateInfos = &queueCreateInfo;
-	createInfo.queueCreateInfoCount = 1;
+	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.pEnabledFeatures = &deviceFeatures;
 	createInfo.enabledExtensionCount = 0;
 
@@ -82,6 +99,7 @@ void Application::createLogicalDevice() {
 	}
 
 	vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
 
 void Application::pickPhysicalDevice() {
@@ -180,6 +198,12 @@ Application::QueueFamilyIndices Application::findQueueFamilies(VkPhysicalDevice 
 	int i = 0;
 
 	for (const auto &queueFamily : queueFamilies) {
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+		if (presentSupport) {
+			indices.presentFamily = i;
+		}
+
 		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 			indices.graphicsFamily = i;
 		}
@@ -301,6 +325,7 @@ void Application::mainLoop() {
 void Application::cleanUp() {
 	std::cout << "Cleaning up before closing" << std::endl;
 
+	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
 
