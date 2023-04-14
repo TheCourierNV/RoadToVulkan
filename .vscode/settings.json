@@ -69,6 +69,12 @@
 		"typeindex": "cpp",
 		"typeinfo": "cpp",
 		"valarray": "cpp",
-		"variant": "cpp"
+		"variant": "cpp",
+		"csignal": "cpp",
+		"strstream": "cpp",
+		"bitset": "cpp",
+		"charconv": "cpp",
+		"complex": "cpp",
+		"hash_map": "cpp"
 	}
 }

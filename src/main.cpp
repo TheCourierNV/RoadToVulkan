@@ -1,7 +1,11 @@
 #include <iostream>
-#include "Version.h"
 
-int main(int, char**) {
-    std::cout << "Hello, world!" << std::endl;
-    std::cout << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_PATCH << std::endl;
+#include "Application.h"
+
+int main(int, char **) {
+	std::cout << "RoadToVulkan" << std::endl;
+
+	Application app;
+
+	app.run();
 }
