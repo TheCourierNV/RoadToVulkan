@@ -83,7 +83,8 @@ void Application::createLogicalDevice() {
 	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.pEnabledFeatures = &deviceFeatures;
-	createInfo.enabledExtensionCount = 0;
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	if (enableValidationLayers) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
@@ -135,6 +136,9 @@ void Application::pickPhysicalDevice() {
 bool Application::isDeviceSuitable(VkPhysicalDevice toCheck) {
 	std::cout << "\tChecking a physical device" << std::endl;
 
+	const std::vector<const char *> deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
 	VkPhysicalDeviceProperties deviceProperties;
 	vkGetPhysicalDeviceProperties(toCheck, &deviceProperties);
 
@@ -144,7 +148,32 @@ bool Application::isDeviceSuitable(VkPhysicalDevice toCheck) {
 
 	QueueFamilyIndices indices = findQueueFamilies(toCheck);
 
-	return indices.graphicsFamily.has_value();
+	bool extensionsSupported = checkDeviceExtensionSupport(toCheck);
+
+	bool swapChainAdequate = false;
+
+	if (extensionsSupported) {
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(toCheck);
+		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+	}
+
+	return indices.isComplete() && extensionsSupported && swapChainAdequate;
+}
+
+bool Application::checkDeviceExtensionSupport(VkPhysicalDevice toCheck) {
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties(toCheck, nullptr, &extensionCount, nullptr);
+
+	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(toCheck, nullptr, &extensionCount, availableExtensions.data());
+
+	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+	for (const auto &extension : availableExtensions) {
+		requiredExtensions.erase(extension.extensionName);
+	}
+
+	return requiredExtensions.empty();
 }
 
 bool Application::checkValidationLayerSupport() {
@@ -312,6 +341,32 @@ bool Application::checkVulkanExtensions(const char **requiredExtensions, uint32_
 
 	std::cout << "\tExtensions OK!" << std::endl;
 	return true;
+}
+
+Application::SwapChainSupportDetails Application::querySwapChainSupport(VkPhysicalDevice toCheck) {
+	std::cout << "Checking swap chain support" << std::endl;
+
+	SwapChainSupportDetails details;
+
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(toCheck, surface, &details.capabilities);
+
+	uint32_t formatCount;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(toCheck, surface, &formatCount, nullptr);
+
+	if (formatCount != 0) {
+		details.formats.resize(formatCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(toCheck, surface, &formatCount, details.formats.data());
+	}
+
+	uint32_t presentModeCount;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(toCheck, surface, &presentModeCount, nullptr);
+
+	if (presentModeCount != 0) {
+		details.presentModes.resize(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(toCheck, surface, &presentModeCount, details.presentModes.data());
+	}
+
+	return details;
 }
 
 void Application::mainLoop() {
